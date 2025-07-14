@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: runnify-postgres
+    environment:
+      POSTGRES_DB: runnify
+      POSTGRES_USER: runnify
+      POSTGRES_PASSWORD: runnify
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - runnify-network
+
+  runnify-app:
+    build: .
+    container_name: runnify-app
+    depends_on:
+      - postgres
+    environment:
+      DB_NAME: runnify
+      DB_USERNAME: runnify
+      DB_PASSWORD: runnify
+      SPOTIFY_CLIENT_ID: ${SPOTIFY_CLIENT_ID}
+      SPOTIFY_CLIENT_SECRET: ${SPOTIFY_CLIENT_SECRET}
+      SPOTIFY_REDIRECT_URI: ${SPOTIFY_REDIRECT_URI:-http://localhost:8080/auth/spotify/callback}
+    ports:
+      - "8080:8080"
+    networks:
+      - runnify-network
+    volumes:
+      - ./uploads:/app/uploads
+
+volumes:
+  postgres_data:
+
+networks:
+  runnify-network:
+    driver: bridge
