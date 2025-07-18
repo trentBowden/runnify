@@ -3,7 +3,7 @@ spring:
     name: runnify
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/${DB_NAME:runnify}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:runnify}
     username: ${DB_USERNAME:runnify}
     password: ${DB_PASSWORD:runnify}
     driver-class-name: org.postgresql.Driver
@@ -44,3 +44,6 @@ logging:
   level:
     dev.trentbowden.runnify: ${LOG_LEVEL:INFO}
     org.springframework.web: ${WEB_LOG_LEVEL:WARN}
+    org.springframework.jdbc: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
