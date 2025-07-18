@@ -3,6 +3,7 @@ services:
     image: postgres:15
     container_name: runnify-postgres
     environment:
+      POSTGRES_PORT: 5433
       POSTGRES_DB: runnify
       POSTGRES_USER: runnify
       POSTGRES_PASSWORD: runnify
@@ -12,6 +13,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - runnify-network
+    command: ["postgres", "-p", "5433"]
 
   runnify-app:
     build: .

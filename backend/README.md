@@ -1,5 +1,19 @@
 # Runnify
 
+Let's be honest, you just came for these:
+
+```
+docker-compose up postgres -d
+./mvnw spring-boot:run
+
+```
+
+And later,
+
+```
+docker-compose down -v
+```
+
 **GPX meets Spotify**
 
 (scottMorrison.jpeg) _How good is Kotlin?_. Only one way to find out. This project is for me to map a Spotify playlist to a GPX file.
