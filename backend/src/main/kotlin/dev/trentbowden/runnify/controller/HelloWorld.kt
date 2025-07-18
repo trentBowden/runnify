@@ -19,6 +19,6 @@ class HelloWorldController(private val pageViewService: PageViewService) {
         )
 
         val pageViews = pageViewService.getPageViewsByUrl(httpRequest.requestURI ?: "unknown")
-        return "Hello, World!! This page has been viewed ${pageViews.size} times."
+        return "Hello, World!! This page has been viewed about ${pageViews.size} times."
     }
 }
