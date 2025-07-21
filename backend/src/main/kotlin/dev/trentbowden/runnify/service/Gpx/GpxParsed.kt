@@ -4,5 +4,6 @@ data class GpxParsed(
         val name: String,
         val description: String,
         val distance: Double,
-        val elevation: Double,
+        val elevationGain: Double,
+        val elevationLoss: Double,
 )
