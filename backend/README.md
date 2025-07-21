@@ -14,6 +14,10 @@ And later,
 docker-compose down -v
 ```
 
+But if you run into trouble
+
+`./mvnw clean package`
+
 **GPX meets Spotify**
 
 (scottMorrison.jpeg) _How good is Kotlin?_. Only one way to find out. This project is for me to map a Spotify playlist to a GPX file.

@@ -1,10 +1,16 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+  </head>
   <body>
-    The form below should appear.
+    <div class="centered">
+      The form below should appear!?.
+    </div>
     <form method="post" enctype="multipart/form-data" action="/upload">
       <input type="file" name="file" />
       <button type="submit">Upload GPX</button>
     </form>
+  </div>
   </body>
 </html>

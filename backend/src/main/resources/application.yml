@@ -31,6 +31,10 @@ spotify:
   redirect-uri: ${SPOTIFY_REDIRECT_URI:http://localhost:8080/auth/spotify/callback}
   base-url: https://api.spotify.com/v1
 
+devtools:
+  restart:
+    enabled: true
+
 management:
   endpoints:
     web:

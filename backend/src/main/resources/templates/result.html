@@ -2,8 +2,10 @@
 <html xmlns:th="http://www.thymeleaf.org">
   <body>
     <h1>Result</h1>
-    <p>File uploaded successfully</p>
-    <p>File name: <span th:text="${file.originalFilename}" /></p>
-    <p>File size: <span th:text="${file.size}" /></p>
+    <p>GPX uploaded successfully</p>
+    <p>Name: <span th:text="${gpx.name}" /></p>
+    <p>Description: <span th:text="${gpx.description}" /></p>
+
+    <img th:src="@{/images/sauce.jpg}" alt="Successful and saucy" />
   </body>
 </html>
