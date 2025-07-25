@@ -13,6 +13,22 @@
     <ul>
       <li th:each="hill : ${gpx.hills}" th:text="${hill.gain + ' m'}"></li>
     </ul>
+    <button
+      id="flythrough-btn"
+      style="margin: 10px; padding: 10px; font-size: 16px"
+    >
+      Start Flythrough
+    </button>
+    <label
+      >Speed:
+      <input
+        type="range"
+        id="speed-slider"
+        min="0.0001"
+        max="0.001"
+        step="0.0001"
+        value="0.0003"
+    /></label>
     <div id="threejs-container" style="width: 600px; height: 400px"></div>
     <script th:inline="javascript">
       /*<![CDATA[*/
@@ -27,6 +43,27 @@
 
       // Hooray for some dude on YouTube
       // https://www.youtube.com/watch?v=nwiaqLGAyjo&t=12s&ab_channel=WaelYasmina
+
+      let isFlythroughActive = false;
+      let flythroughProgress = 0;
+      let flythroughSpeed = 0.0003;
+
+      // Don't allow the user to move the camera while flying.
+      function startFlythrough() {
+        isFlythroughActive = true;
+        flythroughProgress = 0;
+        controls.enabled = false;
+        document.getElementById("flythrough-btn").textContent =
+          "Stop Flythrough";
+      }
+
+      // re-enable controls
+      function stopFlythrough() {
+        isFlythroughActive = false;
+        controls.enabled = true;
+        document.getElementById("flythrough-btn").textContent =
+          "Start Flythrough";
+      }
 
       // Scene setup
       const scene = new THREE.Scene();
@@ -93,19 +130,71 @@
       camera.lookAt(center);
       controls.target.copy(center);
 
+      const curve = new THREE.CatmullRomCurve3(points);
+
       function animate() {
         requestAnimationFrame(animate);
-        controls.update();
+
+        if (isFlythroughActive) {
+          flythroughProgress += flythroughSpeed;
+
+          if (flythroughProgress >= 1) {
+            stopFlythrough();
+          } else {
+            const t = flythroughProgress;
+            const currentPosition = curve.getPointAt(t);
+
+            // Get multiple points ahead for smoother direction
+            const lookAhead1 = curve.getPointAt(Math.min(t + 0.02, 1));
+            const lookAhead2 = curve.getPointAt(Math.min(t + 0.05, 1));
+            const lookAhead3 = curve.getPointAt(Math.min(t + 0.1, 1));
+
+            // Average the look-ahead points for smoother direction
+            const smoothLookAhead = new THREE.Vector3()
+              .add(lookAhead1)
+              .add(lookAhead2)
+              .add(lookAhead3)
+              .multiplyScalar(1 / 3);
+
+            // Calculate smooth direction
+            const direction = new THREE.Vector3()
+              .subVectors(smoothLookAhead, currentPosition)
+              .normalize();
+
+            // Position camera
+            const cameraDistance = 80;
+            const cameraHeight = 100;
+            const cameraOffset = new THREE.Vector3()
+              .addScaledVector(direction, -cameraDistance)
+              .add(new THREE.Vector3(0, cameraHeight, 0));
+
+            camera.position.copy(currentPosition).add(cameraOffset);
+            camera.lookAt(smoothLookAhead);
+          }
+        } else {
+          controls.update();
+        }
+
         renderer.render(scene, camera);
-
-        // console.log("Camera position:", camera.position);
-        // console.log("Camera target:", camera.target);
-
-        // x: -6260.536939427118;
-        // y: -12549.168721362097;
-        // z: 5781.385933826956;
       }
       animate();
+
+      // Add button event listener
+      document
+        .getElementById("flythrough-btn")
+        .addEventListener("click", function () {
+          if (isFlythroughActive) {
+            stopFlythrough();
+          } else {
+            startFlythrough();
+          }
+        });
+
+      document
+        .getElementById("speed-slider")
+        .addEventListener("input", function (e) {
+          flythroughSpeed = parseFloat(e.target.value);
+        });
     </script>
   </body>
 </html>

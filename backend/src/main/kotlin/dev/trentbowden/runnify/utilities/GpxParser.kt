@@ -43,7 +43,9 @@ class GpxParser {
         val y = dLat * R
         val z = trackPoint.elevation - referencePoint.elevation
 
-        return TrackPointCartesian(x, y, z)
+        // Swapping y and z coordinates
+        // Otherwise the flythrough looks like a rollercoaster.
+        return TrackPointCartesian(x, z, y)
     }
 
     fun findHills(elevations: List<Double>, minGain: Double = 10.0): List<Hill> {
