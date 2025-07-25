@@ -42,6 +42,24 @@
         (p) => new THREE.Vector3(p.x, p.y, p.z)
       );
 
+      // Make a cube at the start, to indicate the start of the track
+      const startCubeGeometry = new THREE.BoxGeometry(200, 200, 200);
+      const startCubeMaterial = new THREE.MeshBasicMaterial({
+        color: 0x00ff00,
+      });
+      const startCube = new THREE.Mesh(startCubeGeometry, startCubeMaterial);
+      startCube.position.copy(points[0]);
+      scene.add(startCube);
+
+      // Make a cube at the end, to indicate the end of the track
+      const endCubeGeometry = new THREE.BoxGeometry(200, 200, 200);
+      const endCubeMaterial = new THREE.MeshBasicMaterial({
+        color: 0xff0000,
+      });
+      const endCube = new THREE.Mesh(endCubeGeometry, endCubeMaterial);
+      endCube.position.copy(points[points.length - 1]);
+      scene.add(endCube);
+
       // Calculate bounding box
       const box = new THREE.Box3().setFromPoints(points);
       const center = box.getCenter(new THREE.Vector3());
