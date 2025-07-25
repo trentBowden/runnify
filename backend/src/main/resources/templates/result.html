@@ -2,30 +2,56 @@
 
 <html xmlns:th="http://www.thymeleaf.org">
   <body>
-    <h1>Result</h1>
-    <p>GPX uploaded successfully</p>
-    <p>Name: <span th:text="${gpx.name}" /></p>
-    <p>Description: <span th:text="${gpx.description}" /></p>
-    <p>Elevation Gain: <span th:text="${gpx.elevationGain}" /> m</p>
-    <p>Elevation Loss: <span th:text="${gpx.elevationLoss}" /> m</p>
-    <p>Distance: <span th:text="${gpx.distance}" /> m</p>
-    <button
-      id="flythrough-btn"
-      style="margin: 10px; padding: 10px; font-size: 16px"
+    <div
+      id="toolbar"
+      style="
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1000;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        min-width: 300px;
+      "
     >
-      Start Flythrough
-    </button>
-    <label
-      >Speed:
-      <input
-        type="range"
-        id="speed-slider"
-        min="0.0001"
-        max="0.001"
-        step="0.0001"
-        value="0.0003"
-    /></label>
-    <div id="threejs-container" style="width: vw; height: vh"></div>
+      <h3 style="margin: 0 0 15px 0" th:text="${gpx.name}"></h3>
+
+      <div style="margin-bottom: 15px">
+        <p style="margin: 5px 0; font-size: 14px">
+          <strong>Distance:</strong> <span th:text="${gpx.distance}" /> m
+        </p>
+        <p style="margin: 5px 0; font-size: 14px">
+          <strong>Elevation Gain:</strong>
+          <span th:text="${gpx.elevationGain}" /> m
+        </p>
+      </div>
+
+      <div style="margin-bottom: 15px">
+        <button id="flythrough-btn">Start Flythrough</button>
+      </div>
+
+      <div>
+        <label style="display: block; margin: 10px 0; font-size: 14px">
+          <strong>Speed:</strong>
+          <input
+            type="range"
+            id="speed-slider"
+            min="0.0001"
+            max="0.001"
+            step="0.0001"
+            value="0.0003"
+            style="width: 150px; margin-left: 10px"
+          />
+        </label>
+      </div>
+    </div>
+
+    <div
+      id="threejs-container"
+      style="width: 100vw; height: 100vh; position: fixed; top: 0; left: 0"
+    ></div>
     <script th:inline="javascript">
       /*<![CDATA[*/
       const gpx = [[${gpx}]];
@@ -35,10 +61,6 @@
     <script type="module">
       import * as THREE from "./packages/threeJS/three.module.js";
       import { OrbitControls } from "./packages/threeJS/OrbitControls.js";
-      // import { FlyControls } from "./packages/threeJS/FlyControls.js";
-
-      // Hooray for some dude on YouTube
-      // https://www.youtube.com/watch?v=nwiaqLGAyjo&t=12s&ab_channel=WaelYasmina
 
       let isFlythroughActive = false;
       let flythroughProgress = 0;
@@ -63,12 +85,26 @@
 
       // Scene setup
       const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(75, 600 / 400, 0.1, 100000);
+      const camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        100000
+      );
       const renderer = new THREE.WebGLRenderer();
-      renderer.setSize(600, 400);
+
+      // Update renderer size for full screen
+      renderer.setSize(window.innerWidth, window.innerHeight);
+
       document
         .getElementById("threejs-container")
         .appendChild(renderer.domElement);
+
+      window.addEventListener("resize", function () {
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+      });
 
       // Debug points
       const points = gpx.trackPointsCartesian.map(
