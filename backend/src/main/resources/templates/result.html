@@ -9,10 +9,6 @@
     <p>Elevation Gain: <span th:text="${gpx.elevationGain}" /> m</p>
     <p>Elevation Loss: <span th:text="${gpx.elevationLoss}" /> m</p>
     <p>Distance: <span th:text="${gpx.distance}" /> m</p>
-    <p>Hills:</p>
-    <ul>
-      <li th:each="hill : ${gpx.hills}" th:text="${hill.gain + ' m'}"></li>
-    </ul>
     <button
       id="flythrough-btn"
       style="margin: 10px; padding: 10px; font-size: 16px"
@@ -29,7 +25,7 @@
         step="0.0001"
         value="0.0003"
     /></label>
-    <div id="threejs-container" style="width: 600px; height: 400px"></div>
+    <div id="threejs-container" style="width: vw; height: vh"></div>
     <script th:inline="javascript">
       /*<![CDATA[*/
       const gpx = [[${gpx}]];
@@ -97,6 +93,15 @@
       endCube.position.copy(points[points.length - 1]);
       scene.add(endCube);
 
+      // Make a cube representing the runner on the flythrough
+      const runnerCubeGeometry = new THREE.BoxGeometry(50, 50, 50);
+      const runnerCubeMaterial = new THREE.MeshBasicMaterial({
+        color: 0x00ff00,
+      });
+      const runnerCube = new THREE.Mesh(runnerCubeGeometry, runnerCubeMaterial);
+      runnerCube.position.copy(points[0]);
+      scene.add(runnerCube);
+
       // Calculate bounding box
       const box = new THREE.Box3().setFromPoints(points);
       const center = box.getCenter(new THREE.Vector3());
@@ -162,14 +167,16 @@
               .normalize();
 
             // Position camera
-            const cameraDistance = 80;
-            const cameraHeight = 100;
+            const cameraDistance = 500;
+            const cameraHeight = 300;
             const cameraOffset = new THREE.Vector3()
               .addScaledVector(direction, -cameraDistance)
               .add(new THREE.Vector3(0, cameraHeight, 0));
 
             camera.position.copy(currentPosition).add(cameraOffset);
             camera.lookAt(smoothLookAhead);
+
+            runnerCube.position.copy(currentPosition);
           }
         } else {
           controls.update();
