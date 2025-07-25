@@ -45,6 +45,7 @@
 
       <div style="margin-bottom: 15px">
         <button id="flythrough-btn">Start Flythrough</button>
+        <button id="reset-btn">Reset</button>
       </div>
 
       <div>
@@ -84,15 +85,46 @@
       // Don't allow the user to move the camera while flying.
       function startFlythrough() {
         isFlythroughActive = true;
-        flythroughProgress = 0;
         controls.enabled = false;
         document.getElementById("flythrough-btn").textContent =
-          "Stop Flythrough";
+          "Pause Flythrough";
       }
 
       // re-enable controls
-      function stopFlythrough() {
+      function pauseFlythrough() {
         isFlythroughActive = false;
+
+        // Set the target to where the camera is currently looking
+        const lookDirection = new THREE.Vector3();
+        camera.getWorldDirection(lookDirection);
+        controls.target.copy(camera.position.clone().add(lookDirection));
+
+        controls.enabled = true;
+        document.getElementById("flythrough-btn").textContent =
+          "Resume Flythrough";
+      }
+
+      function resetFlythrough() {
+        isFlythroughActive = false;
+        flythroughProgress = 0;
+
+        // Reset camera to original position
+        const box = new THREE.Box3().setFromPoints(points);
+        const center = box.getCenter(new THREE.Vector3());
+        const size = box.getSize(new THREE.Vector3());
+
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const fov = camera.fov * (Math.PI / 180);
+        let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2));
+        cameraZ *= 1.5;
+
+        camera.position.set(center.x, center.y, center.z + cameraZ);
+        camera.lookAt(center);
+        controls.target.copy(center);
+
+        // Reset runner cube to start
+        runnerCube.position.copy(points[0]);
+
         controls.enabled = true;
         document.getElementById("flythrough-btn").textContent =
           "Start Flythrough";
@@ -195,14 +227,18 @@
           flythroughProgress += flythroughSpeed;
 
           if (flythroughProgress >= 1) {
-            stopFlythrough();
+            // Flythrough complete - pause at the end
+            pauseFlythrough();
           } else {
             const t = flythroughProgress;
             const currentPosition = curve.getPointAt(t);
             document.getElementById("current-distance").textContent =
-              currentPosition.distanceTo(points[0]);
+              currentPosition.distanceTo(points[0]).toFixed(2);
             document.getElementById("current-elevation").textContent =
-              currentPosition.z;
+              currentPosition.z.toFixed(2);
+            document.getElementById("flythrough-progress").textContent = (
+              flythroughProgress * 100
+            ).toFixed(2);
 
             // Get multiple points ahead for smoother direction
             const lookAhead1 = curve.getPointAt(Math.min(t + 0.02, 1));
@@ -245,12 +281,21 @@
       document
         .getElementById("flythrough-btn")
         .addEventListener("click", function () {
-          if (isFlythroughActive) {
-            stopFlythrough();
+          if (!isFlythroughActive && flythroughProgress === 0) {
+            // Starting fresh
+            startFlythrough();
+          } else if (isFlythroughActive) {
+            // Currently flying - pause
+            pauseFlythrough();
           } else {
+            // Paused - resume
             startFlythrough();
           }
         });
+
+      document
+        .getElementById("reset-btn")
+        .addEventListener("click", resetFlythrough);
 
       document
         .getElementById("speed-slider")
