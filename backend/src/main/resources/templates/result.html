@@ -42,12 +42,15 @@
         (p) => new THREE.Vector3(p.x, p.y, p.z)
       );
 
-      console.log("First few points:", points.slice(0, 5));
-      console.log("Points length:", points.length);
-      console.log(
-        "Any NaN values:",
-        points.some((p) => isNaN(p.x) || isNaN(p.y) || isNaN(p.z))
-      );
+      // Calculate bounding box
+      const box = new THREE.Box3().setFromPoints(points);
+      const center = box.getCenter(new THREE.Vector3());
+      const size = box.getSize(new THREE.Vector3());
+
+      // Position camera to see the whole model
+      const maxDim = Math.max(size.x, size.y, size.z);
+      const fov = camera.fov * (Math.PI / 180);
+      let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2));
 
       // Create geometry
       const pathGeometry = new THREE.BufferGeometry().setFromPoints(points);
@@ -63,14 +66,14 @@
       controls.enableRotate = true;
       controls.enableKeys = true;
 
-      const midPoint = points.at(points.length / 2);
+      // const midPoint = points.at(points.length / 2);
 
-      camera.position.set(
-        midPoint.x - 4300,
-        midPoint.y - 3000,
-        midPoint.z - 2680
-      );
-      camera.lookAt(midPoint.x, midPoint.y, midPoint.z);
+      // Add some padding
+      cameraZ *= 1.5;
+
+      camera.position.set(center.x, center.y, center.z + cameraZ);
+      camera.lookAt(center);
+      controls.target.copy(center);
 
       function animate() {
         requestAnimationFrame(animate);
