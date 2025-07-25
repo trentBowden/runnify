@@ -9,6 +9,8 @@ data class Hill(val startIndex: Int, val endIndex: Int, val gain: Double)
 
 data class TrackPoint(val lat: Double, val lon: Double, val elevation: Double)
 
+data class TrackPointCartesian(val x: Double, val y: Double, val z: Double)
+
 class GpxParser {
 
     // To calculate the distance between two points on the earth's surface, we use the haversine
@@ -25,6 +27,23 @@ class GpxParser {
         val c = 2 * atan2(sqrt(a), sqrt(1 - a))
 
         return R * c // Distance in meters
+    }
+
+    private fun trackPointToCartesian(
+            referencePoint: TrackPoint,
+            trackPoint: TrackPoint
+    ): TrackPointCartesian {
+        val R = 6371000.0 // Earth radius in meters
+
+        val lat0Rad = Math.toRadians(referencePoint.lat)
+        val dLat = Math.toRadians(trackPoint.lat - referencePoint.lat)
+        val dLon = Math.toRadians(trackPoint.lon - referencePoint.lon)
+
+        val x = dLon * cos(lat0Rad) * R
+        val y = dLat * R
+        val z = trackPoint.elevation - referencePoint.elevation
+
+        return TrackPointCartesian(x, y, z)
     }
 
     fun findHills(elevations: List<Double>, minGain: Double = 10.0): List<Hill> {
@@ -76,24 +95,6 @@ class GpxParser {
         val inputStream = file.inputStream
         val docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
         val doc = docBuilder.parse(inputStream)
-
-        // The structure of a GPX file is:
-        // https://en.wikipedia.org/wiki/GPS_Exchange_Format
-        // <gpx>
-        //   <metadata>
-        //     <name>Data name</name>
-        //     <desc>Valid GPX example without special characters</desc>
-        //     <author>
-        //       <name>Author name</name>
-        //     </author>
-        //   </metadata>
-        //   <wpt>
-        //     <ele>35.0</ele>
-        //     <time>2011-12-31T23:59:59Z</time>
-        //     <name>Reichstag (Berlin)</name>
-        //     <sym>City</sym>
-        //   </wpt>
-        // </gpx>
 
         // 1. Get the name and description, if any
         val name = doc.getElementsByTagName("name")?.item(0)?.textContent ?: fileName
@@ -191,6 +192,12 @@ class GpxParser {
                     TrackPoint(thisLat, thisLon, thisElevation)
                 }
 
+        val referencePoint = myTrackPoints.first()
+        val myTrackPointsCartesian =
+                myTrackPoints.map { trackPoint ->
+                    trackPointToCartesian(referencePoint, trackPoint)
+                }
+
         val gpx =
                 GpxParsed(
                         name,
@@ -199,7 +206,8 @@ class GpxParser {
                         elevationGain.roundToInt().toDouble(),
                         elevationLoss.roundToInt().toDouble(),
                         hills,
-                        myTrackPoints
+                        myTrackPoints,
+                        myTrackPointsCartesian
                 )
 
         return gpx
