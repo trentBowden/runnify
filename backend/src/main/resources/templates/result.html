@@ -23,11 +23,12 @@
     <script type="module">
       import * as THREE from "./packages/threeJS/three.module.js";
       import { OrbitControls } from "./packages/threeJS/OrbitControls.js";
+      // import { FlyControls } from "./packages/threeJS/FlyControls.js";
 
       // Hooray for some dude on YouTube
       // https://www.youtube.com/watch?v=nwiaqLGAyjo&t=12s&ab_channel=WaelYasmina
 
-      // Set up scene, camera, renderer
+      // Scene setup
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(75, 600 / 400, 0.1, 100000);
       const renderer = new THREE.WebGLRenderer();
@@ -36,35 +37,52 @@
         .getElementById("threejs-container")
         .appendChild(renderer.domElement);
 
-      const controls = new OrbitControls(camera, renderer.domElement);
-
-      // Path
+      // Debug points
       const points = gpx.trackPointsCartesian.map(
-        (point) => new THREE.Vector3(point.x, point.y, point.z)
+        (p) => new THREE.Vector3(p.x, p.y, p.z)
       );
 
-      console.log("Point count:", points.length);
-      const path = new THREE.CatmullRomCurve3(points);
-      // const pathGeometry = new THREE.BufferGeometry().setFromPoints(
-      //   path.getPoints(points.length - 1)
-      // );
-      // const pathMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00 });
-      // const pathMesh = new THREE.Line(pathGeometry, pathMaterial);
-      // scene.add(pathMesh);
+      console.log("First few points:", points.slice(0, 5));
+      console.log("Points length:", points.length);
+      console.log(
+        "Any NaN values:",
+        points.some((p) => isNaN(p.x) || isNaN(p.y) || isNaN(p.z))
+      );
 
+      // Create geometry
       const pathGeometry = new THREE.BufferGeometry().setFromPoints(points);
       const pathMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00 });
       const pathMesh = new THREE.Line(pathGeometry, pathMaterial);
       scene.add(pathMesh);
 
-      camera.position.z = 3;
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.25;
+      controls.enableZoom = true;
+      controls.enablePan = true;
+      controls.enableRotate = true;
+      controls.enableKeys = true;
+
+      const midPoint = points.at(points.length / 2);
+
+      camera.position.set(
+        midPoint.x - 4300,
+        midPoint.y - 3000,
+        midPoint.z - 2680
+      );
+      camera.lookAt(midPoint.x, midPoint.y, midPoint.z);
 
       function animate() {
         requestAnimationFrame(animate);
-        // pathMesh.rotation.x += 0.01;
-        // pathMesh.rotation.y += 0.01;
         controls.update();
         renderer.render(scene, camera);
+
+        // console.log("Camera position:", camera.position);
+        // console.log("Camera target:", camera.target);
+
+        // x: -6260.536939427118;
+        // y: -12549.168721362097;
+        // z: 5781.385933826956;
       }
       animate();
     </script>
