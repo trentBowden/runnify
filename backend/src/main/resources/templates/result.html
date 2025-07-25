@@ -8,5 +8,9 @@
     <p>Elevation Gain: <span th:text="${gpx.elevationGain}" /> m</p>
     <p>Elevation Loss: <span th:text="${gpx.elevationLoss}" /> m</p>
     <p>Distance: <span th:text="${gpx.distance}" /> m</p>
+    <p>Hills:</p>
+    <ul>
+      <li th:each="hill : ${gpx.hills}" th:text="${hill.gain + ' m'}"></li>
+    </ul>
   </body>
 </html>

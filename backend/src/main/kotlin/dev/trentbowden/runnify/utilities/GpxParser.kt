@@ -5,7 +5,15 @@ import javax.xml.parsers.DocumentBuilderFactory
 import kotlin.math.*
 import org.springframework.web.multipart.MultipartFile
 
+data class Hill(val startIndex: Int, val endIndex: Int, val gain: Double)
+
+data class TrackPoint(val lat: Double, val lon: Double, val elevation: Double)
+
 class GpxParser {
+
+    // To calculate the distance between two points on the earth's surface, we use the haversine
+    // formula.
+    // https://en.wikipedia.org/wiki/Haversine_formula
     private fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
         val R = 6371e3 // Earth radius in meters
         val phi1 = Math.toRadians(lat1)
@@ -17,6 +25,43 @@ class GpxParser {
         val c = 2 * atan2(sqrt(a), sqrt(1 - a))
 
         return R * c // Distance in meters
+    }
+
+    fun findHills(elevations: List<Double>, minGain: Double = 10.0): List<Hill> {
+        val hills = mutableListOf<Hill>()
+        var climbing = false
+        var startIdx = 0
+        var startElevation = 0.0
+        var maxElevation = 0.0
+
+        for (i in 1 until elevations.size) {
+            val diff = elevations[i] - elevations[i - 1]
+            if (diff > 0) {
+                if (!climbing) {
+                    climbing = true
+                    startIdx = i - 1
+                    startElevation = elevations[startIdx]
+                    maxElevation = elevations[i]
+                } else {
+                    maxElevation = maxOf(maxElevation, elevations[i])
+                }
+            } else if (climbing && diff <= 0) {
+                // End of climb
+                val gain = maxElevation - startElevation
+                if (gain >= minGain) {
+                    hills.add(Hill(startIdx, i - 1, gain))
+                }
+                climbing = false
+            }
+        }
+        // Handle if the last segment is a climb
+        if (climbing) {
+            val gain = maxElevation - startElevation
+            if (gain >= minGain) {
+                hills.add(Hill(startIdx, elevations.size - 1, gain))
+            }
+        }
+        return hills
     }
 
     fun parse(file: MultipartFile): GpxParsed {
@@ -59,6 +104,10 @@ class GpxParser {
         var elevationGain = 0.0
         var elevationLoss = 0.0
 
+        // I was getting a lot of noise in the elevation data, so I'm going to ignore
+        // any changes less than X meters.
+        val elevationThreshold = 0.08
+
         val elevationTags = doc.getElementsByTagName("ele")
         if (elevationTags.length > 0) {
             for (i in 1 until elevationTags.length) {
@@ -69,9 +118,13 @@ class GpxParser {
                         else elevationTags.item(i - 1).textContent?.toDouble() ?: 0.0
 
                 // Assuming that no elevations are negative..
-                if (thisElevation > lastElevation) {
+                if (thisElevation > lastElevation &&
+                                thisElevation - lastElevation > elevationThreshold
+                ) {
                     elevationGain += thisElevation - lastElevation
-                } else {
+                } else if (thisElevation < lastElevation &&
+                                lastElevation - thisElevation > elevationThreshold
+                ) {
                     elevationLoss += lastElevation - thisElevation
                 }
             }
@@ -119,13 +172,34 @@ class GpxParser {
             }
         }
 
+        val elevations =
+                (0 until elevationTags.length).map { i ->
+                    elevationTags.item(i).textContent?.toDouble() ?: 0.0
+                }
+        val hills = findHills(elevations)
+
+        val myTrackPoints =
+                (0 until trackPoints.length).map { i ->
+                    val thisTrackPoint = trackPoints.item(i)
+                    val thisLat =
+                            thisTrackPoint.attributes.getNamedItem("lat")?.textContent?.toDouble()
+                                    ?: 0.0
+                    val thisLon =
+                            thisTrackPoint.attributes.getNamedItem("lon")?.textContent?.toDouble()
+                                    ?: 0.0
+                    val thisElevation = elevationTags.item(i).textContent?.toDouble() ?: 0.0
+                    TrackPoint(thisLat, thisLon, thisElevation)
+                }
+
         val gpx =
                 GpxParsed(
                         name,
                         description,
                         totalDistance.roundToInt().toDouble(),
                         elevationGain.roundToInt().toDouble(),
-                        elevationLoss.roundToInt().toDouble()
+                        elevationLoss.roundToInt().toDouble(),
+                        hills,
+                        myTrackPoints
                 )
 
         return gpx
