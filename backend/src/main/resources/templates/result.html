@@ -28,6 +28,21 @@
         </p>
       </div>
 
+      <div style="margin-bottom: 15px" id="flythrough-stats">
+        <p style="margin: 5px 0; font-size: 14px">
+          <strong>Flythrough Progress:</strong>
+          <span id="flythrough-progress" /> 0%
+        </p>
+        <p style="margin: 5px 0; font-size: 14px">
+          <strong>Current Distance:</strong>
+          <span id="current-distance" /> m
+        </p>
+        <p style="margin: 5px 0; font-size: 14px">
+          <strong>Current Elevation:</strong>
+          <span id="current-elevation" /> m
+        </p>
+      </div>
+
       <div style="margin-bottom: 15px">
         <button id="flythrough-btn">Start Flythrough</button>
       </div>
@@ -184,6 +199,10 @@
           } else {
             const t = flythroughProgress;
             const currentPosition = curve.getPointAt(t);
+            document.getElementById("current-distance").textContent =
+              currentPosition.distanceTo(points[0]);
+            document.getElementById("current-elevation").textContent =
+              currentPosition.z;
 
             // Get multiple points ahead for smoother direction
             const lookAhead1 = curve.getPointAt(Math.min(t + 0.02, 1));
