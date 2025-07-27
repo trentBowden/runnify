@@ -55,12 +55,18 @@
             type="range"
             id="speed-slider"
             min="0.0001"
-            max="0.001"
+            max="0.1"
             step="0.0001"
             value="0.0003"
             style="width: 150px; margin-left: 10px"
           />
         </label>
+        <p
+          id="speed-display"
+          style="margin: 5px 0; font-size: 14px; color: #4caf50"
+        >
+          <strong>Current Speed:</strong> <span id="current-speed">0</span> km/h
+        </p>
       </div>
     </div>
 
@@ -81,18 +87,49 @@
       let isFlythroughActive = false;
       let flythroughProgress = 0;
       let flythroughSpeed = 0.0003;
+      let lastFlythroughTime = 0;
+      let lastFlythroughProgress = 0;
+      let currentSpeedKmh = 0;
+
+      // Function to calculate speed in km/h
+      function calculateSpeed() {
+        if (!isFlythroughActive || lastFlythroughTime === 0) {
+          return 0;
+        }
+
+        const currentTime = Date.now();
+        const timeElapsed = (currentTime - lastFlythroughTime) / 1000; // seconds
+        const progressElapsed = flythroughProgress - lastFlythroughProgress;
+
+        if (timeElapsed > 0 && progressElapsed > 0) {
+          // Calculate total path length (you'll need to calculate this)
+          const totalDistanceKm = gpx.distance / 1000; // Convert meters to km
+
+          // Calculate speed based on progress through the path
+          const speedKmh =
+            ((totalDistanceKm * progressElapsed) / timeElapsed) * 3600; // Convert to km/h
+
+          return Math.round(speedKmh);
+        }
+
+        return 0;
+      }
 
       // Don't allow the user to move the camera while flying.
       function startFlythrough() {
         isFlythroughActive = true;
+        lastFlythroughTime = Date.now();
+        lastFlythroughProgress = flythroughProgress;
         controls.enabled = false;
         document.getElementById("flythrough-btn").textContent =
           "Pause Flythrough";
+        document.getElementById("flythrough-btn").style.background = "#ff9800";
       }
 
       // re-enable controls
       function pauseFlythrough() {
         isFlythroughActive = false;
+        lastFlythroughTime = 0; // Reset time tracking
 
         // Set the target to where the camera is currently looking
         const lookDirection = new THREE.Vector3();
@@ -102,6 +139,10 @@
         controls.enabled = true;
         document.getElementById("flythrough-btn").textContent =
           "Resume Flythrough";
+        document.getElementById("flythrough-btn").style.background = "#4CAF50";
+
+        // Update speed display to 0
+        document.getElementById("current-speed").textContent = "0";
       }
 
       function resetFlythrough() {
@@ -235,7 +276,7 @@
             document.getElementById("current-distance").textContent =
               currentPosition.distanceTo(points[0]).toFixed(2);
             document.getElementById("current-elevation").textContent =
-              currentPosition.z.toFixed(2);
+              currentPosition.y.toFixed(2);
             document.getElementById("flythrough-progress").textContent = (
               flythroughProgress * 100
             ).toFixed(2);
@@ -268,6 +309,15 @@
             camera.lookAt(smoothLookAhead);
 
             runnerCube.position.copy(currentPosition);
+
+            // Calculate and display speed
+            currentSpeedKmh = calculateSpeed();
+            document.getElementById("current-speed").textContent =
+              currentSpeedKmh;
+
+            // Update time tracking
+            lastFlythroughTime = Date.now();
+            lastFlythroughProgress = flythroughProgress;
           }
         } else {
           controls.update();
@@ -297,11 +347,30 @@
         .getElementById("reset-btn")
         .addEventListener("click", resetFlythrough);
 
+      // Add this function
+      function updateSpeedDisplay() {
+        if (isFlythroughActive) {
+          // Estimate speed based on flythrough speed and total distance
+          const totalDistanceKm = gpx.distance / 1000;
+          const estimatedSpeedKmh = Math.round(
+            totalDistanceKm * flythroughSpeed * 10000
+          ); // Adjust multiplier as needed
+          document.getElementById("current-speed").textContent =
+            estimatedSpeedKmh;
+        } else {
+          document.getElementById("current-speed").textContent = "0";
+        }
+      }
+
+      // Update the speed slider event listener
       document
         .getElementById("speed-slider")
         .addEventListener("input", function (e) {
           flythroughSpeed = parseFloat(e.target.value);
+          updateSpeedDisplay();
         });
+
+      // Call updateSpeedDisplay in your animate function when flythrough is active
     </script>
   </body>
 </html>
