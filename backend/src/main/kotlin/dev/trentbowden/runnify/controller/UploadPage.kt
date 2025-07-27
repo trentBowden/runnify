@@ -28,6 +28,11 @@ class UploadPageController(private val pageViewService: PageViewService, private
         val track =  spotifyClient.searchTracks("horses")
         println(track)
 
+
+        val privateTracks = spotifyClient.getPrivatePlaylistTracks();
+        println("Private tracks:")
+        println(privateTracks)
+
         val gpx = GpxParser().parse(file)
         model.addAttribute("gpx", gpx)
         return "result"

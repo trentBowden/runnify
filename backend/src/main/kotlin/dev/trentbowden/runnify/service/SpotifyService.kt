@@ -24,6 +24,14 @@ class SpotifyClient  {
     @Value("\${spotify.redirect-uri}")
     private lateinit var redirectUri: URI
 
+    @Value("\${spotify.public-playlist-id}")
+    private lateinit var publicPlaylistId: String
+
+    @Value("\${spotify.private-playlist-id}")
+    private lateinit var privatePlaylistId: String
+
+
+
     private lateinit var accessToken: String
 
     @PostConstruct
@@ -70,6 +78,33 @@ class SpotifyClient  {
             "Error getting current user profile (IO): ${e.message}"
         } catch (e: SpotifyWebApiException) {
             "Error getting current user profile (API): ${e.message}"
+        }
+    }
+
+    fun getPublicPlaylistTracks(): String {
+        return try {
+            val tracks = spotifyApi.getPlaylistsItems(publicPlaylistId).build().execute()
+            tracks.items.joinToString("\n") { it.track.name }
+        } catch (e: IOException) {
+            "Error getting tracks in public playlist (IO): ${e.message}"
+        }
+    }
+
+    fun getPrivatePlaylistTracks(): String {
+        return try {
+            val tracks = spotifyApi.getPlaylistsItems(privatePlaylistId).build().execute()
+            tracks.items.joinToString("\n") { it.track.name }
+        } catch (e: IOException) {
+            "Error getting tracks in public playlist (IO): ${e.message}"
+        }
+    }
+
+    fun getTracksInPlaylist(playlistId: String): String {
+        return try {
+            val tracks = spotifyApi.getPlaylistsItems(playlistId).build().execute()
+            tracks.items.joinToString("\n") { it.track.name }
+        } catch (e: IOException) {
+            "Error getting tracks in playlist (IO): ${e.message}"
         }
     }
 
