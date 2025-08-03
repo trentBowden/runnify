@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# // Runnify generated API client
+src/runnify-api-v1
