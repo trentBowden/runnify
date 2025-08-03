@@ -6,6 +6,9 @@ import java.io.IOException
 import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import se.michaelthelin.spotify.model_objects.specification.Playlist
+import se.michaelthelin.spotify.model_objects.specification.PlaylistSimplified
+import se.michaelthelin.spotify.model_objects.specification.PlaylistTrack
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest
 import java.net.URI
@@ -63,6 +66,7 @@ class SpotifyClient  {
         accessToken = clientCredentials.accessToken
     }
 
+    // Can't do this without an oAuth flow, sorry.
     fun getCurrentUserProfile(): String {
         return try {
 
@@ -81,21 +85,29 @@ class SpotifyClient  {
         }
     }
 
-    fun getPublicPlaylistTracks(): String {
-        return try {
-            val tracks = spotifyApi.getPlaylistsItems(publicPlaylistId).build().execute()
-            tracks.items.joinToString("\n") { it.track.name }
-        } catch (e: IOException) {
-            "Error getting tracks in public playlist (IO): ${e.message}"
-        }
-    }
-
-    fun getPrivatePlaylistTracks(): String {
-        return try {
+    fun getPrivatePlaylistTracks(): Array<PlaylistTrack> {
+        try {
             val tracks = spotifyApi.getPlaylistsItems(privatePlaylistId).build().execute()
-            tracks.items.joinToString("\n") { it.track.name }
+            val playlist = spotifyApi.getPlaylist(privatePlaylistId).build().execute()
+            println(playlist.name.toString())
+            println(playlist.description.toString())
+            println(playlist.images.map { it.url }.toString())
+
+            println("Audio feature::")
+            val tracksSpecific = spotifyApi.getSeveralTracks(tracks.items[0].track.id).build().execute()
+            println(tracksSpecific.map { it.name + " " + it.popularity }.toString())
+
+//            val audioFeatures =
+//                spotifyApi.getAudioFeaturesForSeveralTracks(tracks.items.joinToString(",", transform = { it.track.id })).build().execute()
+//            audioFeatures.toString()
+
+            println("Tracks in private playlist:")
+            println(tracks.items.toString())
+
+            return tracks.items;
+
         } catch (e: IOException) {
-            "Error getting tracks in public playlist (IO): ${e.message}"
+            throw IllegalStateException("Error getting tracks in public playlist (IO): ${e.message}")
         }
     }
 
