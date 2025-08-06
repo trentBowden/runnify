@@ -2,12 +2,19 @@ import {
   createSlice,
   type PayloadAction,
   type CaseReducer,
+  type ActionReducerMapBuilder,
 } from "@reduxjs/toolkit";
 import type { WritableDraft, Draft } from "immer";
-import type { NormalisedStoreState } from "./store";
 
 export interface BaseEntity {
   id: string;
+}
+
+export interface NormalisedStoreState<T> {
+  entities: { [id: string]: T };
+  ids: string[];
+  loading: boolean;
+  error?: string;
 }
 
 /**
@@ -143,11 +150,15 @@ export function createnormalisedReducers<T extends BaseEntity>() {
  * Factory function to create a complete normalised slice.
  * @param name - The name of the slice.
  * @param extraReducers - Any extra reducers to add to the slice.
+ * @param extraReducersBuilder - Builder function for handling async thunks and other external actions.
  * @returns A complete normalised slice.
  */
 export function createnormalisedSlice<T extends BaseEntity>(
   name: string,
-  extraReducers?: Record<string, any>
+  extraReducers?: Record<string, any>,
+  extraReducersBuilder?: (
+    builder: ActionReducerMapBuilder<NormalisedStoreState<T>>
+  ) => void
 ) {
   const initialState: NormalisedStoreState<T> = {
     entities: {},
@@ -165,5 +176,6 @@ export function createnormalisedSlice<T extends BaseEntity>(
       ...baseReducers,
       ...extraReducers,
     },
+    extraReducers: extraReducersBuilder,
   });
 }

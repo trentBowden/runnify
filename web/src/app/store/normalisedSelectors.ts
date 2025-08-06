@@ -1,7 +1,7 @@
 import { createSelector } from "@reduxjs/toolkit";
 
-import type { BaseEntity } from "./createNormalisedSlice";
-import type { NormalisedStoreState, RootState } from "./store";
+import type { BaseEntity, NormalisedStoreState } from "./createNormalisedSlice";
+import type { RootState } from "./store";
 
 /**
  * Generic selectors factory for normalised state.

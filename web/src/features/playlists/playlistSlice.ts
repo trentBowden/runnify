@@ -1,0 +1,89 @@
+import { createAsyncThunk } from "@reduxjs/toolkit";
+import type { Playlist } from "../../runnify-api-v1";
+import { UserPlaylistsControllerApi } from "../../runnify-api-v1";
+import {
+  createnormalisedSlice,
+  type BaseEntity,
+  type NormalisedStoreState,
+} from "../../app/store/createNormalisedSlice";
+
+type PlaylistEntity = Playlist & BaseEntity;
+export interface PlaylistState extends NormalisedStoreState<PlaylistEntity> {}
+const playlistApi = new UserPlaylistsControllerApi();
+
+// Api calls:
+export const fetchPlaylistById = createAsyncThunk(
+  "playlists/fetchById",
+  async (id: string) => {
+    const playlist = await playlistApi.getPlaylistById({ id });
+    if (!playlist) {
+      throw new Error(`Playlist with id ${id} not found`);
+    }
+    return playlist as PlaylistEntity;
+  }
+);
+
+export const fetchAllPlaylists = createAsyncThunk(
+  "playlists/fetchAll",
+  async () => {
+    const playlists = await playlistApi.getPlaylists();
+    return playlists as PlaylistEntity[];
+  }
+);
+
+// Use the generic slice factory to save boilerplate.
+export const playlistSlice = createnormalisedSlice<PlaylistEntity>(
+  "playlists",
+  {},
+  (builder) => {
+    builder
+      /**
+       * Fetch a single playlist
+       */
+      .addCase(fetchPlaylistById.pending, (state) => {
+        state.loading = true;
+        state.error = undefined;
+      })
+      .addCase(fetchPlaylistById.fulfilled, (state, action) => {
+        state.loading = false;
+        const playlist = action.payload;
+        state.entities[playlist.id] = playlist;
+        if (!state.ids.includes(playlist.id)) {
+          state.ids.push(playlist.id);
+        }
+      })
+      .addCase(fetchPlaylistById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || "Failed to fetch playlist";
+      })
+      /**
+       * Fetch all playlists
+       */
+      .addCase(fetchAllPlaylists.pending, (state) => {
+        state.loading = true;
+        state.error = undefined;
+      })
+      .addCase(fetchAllPlaylists.fulfilled, (state, action) => {
+        state.loading = false;
+        state.entities = {};
+        state.ids = [];
+
+        action.payload.forEach((playlist) => {
+          state.entities[playlist.id] = playlist;
+          state.ids.push(playlist.id);
+        });
+      })
+      .addCase(fetchAllPlaylists.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || "Failed to fetch playlists";
+      });
+  }
+);
+
+// Export the CRUD actions
+export const {
+  addEntity: addPlaylist,
+  updateEntity: updatePlaylist,
+  removeEntity: removePlaylist,
+  clearAll: clearAllPlaylists,
+} = playlistSlice.actions;
