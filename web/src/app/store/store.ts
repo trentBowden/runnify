@@ -3,17 +3,14 @@ import {
   playlistSlice,
   type PlaylistState,
 } from "../../features/playlists/playlistSlice";
-import { gpxSlice, type GpxState } from "../../features/gpx/gpxSlice";
 
 export interface RunnifyAppState {
   playlists: PlaylistState;
-  gpx: GpxState;
 }
 
 export const store = configureStore({
   reducer: {
     playlists: playlistSlice.reducer,
-    gpx: gpxSlice.reducer,
   },
 });
 
