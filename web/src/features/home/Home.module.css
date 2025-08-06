@@ -1,10 +1,35 @@
+.homeContainer {
+  display: flex;
+  height: 100vh;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.column {
+  flex: 1;
+  padding: 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  color: black;
+}
+
+.column:nth-child(1),
+.column:nth-child(3) {
+  flex: 0.25; /* 1/4 width */
+}
+
+.column:nth-child(2) {
+  flex: 0.5; /* 2/4 width */
+}
+
 .rendererContainer {
-    width: 100%;
-    height: 400px;
-    border: 1px solid #ccc;
-  }
-  
-  .title {
-    color: #333;
-    font-size: 1.2rem;
-  }
+  width: 100%;
+  height: 400px;
+  border: 1px solid #ccc;
+}
+
+.title {
+  color: #333;
+  font-size: 1.2rem;
+}

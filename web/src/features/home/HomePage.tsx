@@ -4,20 +4,42 @@
 // The second column will have the Playlist Detail View
 // The third column will have the GpxRenderer component.
 
-import { useSelector } from 'react-redux';
-import { selectAllPlaylists } from '../playlists/playlistSelectors';
+import { useEffect } from 'react';
+import { useAppDispatch, useAppSelector } from '../../app/store/hooks';
+import { selectAllPlaylists, selectPlaylistsError, selectPlaylistsLoading } from '../playlists/playlistSelectors';
+import { fetchAllPlaylists } from '../playlists/playlistSlice';
 import styles from './Home.module.css';
 
 const HomePage = () => {
-  // Use useSelector with selectors to get specific data from the store
-  const allPlaylists = useSelector(selectAllPlaylists);
+  // Use typed useAppSelector with selectors to get specific data from the store
+  const dispatch = useAppDispatch();
+
+  // Select data from the store
+  const playlists = useAppSelector(selectAllPlaylists);
+  const loading = useAppSelector(selectPlaylistsLoading);
+  const error = useAppSelector(selectPlaylistsError);
+
+  useEffect(() => {
+    dispatch(fetchAllPlaylists());
+  }, [dispatch]);
+
+  if (loading) {
+    return <div>Loading playlists...</div>;
+  }
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <div className={styles.homeContainer}>
       {/* Column 1: The Playlist Picker and the GpxFileList */}
       <div className={styles.column}>
-        Playlist picker ({allPlaylists.length} playlists)
-        Gpx File list
+        Playlist picker ({playlists.length} playlists)
+        <ul>
+          {playlists.map((playlist) => (
+            <li key={playlist.id}>{playlist.name}</li>
+          ))}
+        </ul>
       </div>
 
       {/* Column 2: The Playlist Detail View */}
