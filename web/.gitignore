@@ -16,6 +16,7 @@ dist-ssr
 .vscode/*
 !.vscode/extensions.json
 .idea
+.idea/*
 .DS_Store
 *.suo
 *.ntvs*
@@ -25,3 +26,4 @@ dist-ssr
 
 # // Runnify generated API client
 src/runnify-api-v1
+

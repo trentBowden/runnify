@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import './App.css'
-import { RandomNumberControllerApi } from './runnify-api-v1/apis/RandomNumberControllerApi'
+import { RandomNumberControllerApi } from '../runnify-api-v1/apis/RandomNumberControllerApi'
 
 function App() {
   const [randomNumber, setRandomNumber] = useState(0);
