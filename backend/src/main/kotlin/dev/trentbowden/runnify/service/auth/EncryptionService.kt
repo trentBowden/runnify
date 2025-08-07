@@ -13,6 +13,10 @@ class EncryptionService {
     @Value("\${app.encryption.password}")
     private lateinit var encryptionPassword: String
 
+    @Value("\${app.encryption.salt}")
+    private lateinit var encryptionSalt: String
+
+
     private lateinit var textEncryptor: TextEncryptor
 
     @PostConstruct
@@ -20,10 +24,10 @@ class EncryptionService {
         if (encryptionPassword.isBlank()) {
             throw IllegalStateException("Encryption password must be configured")
         }
-
-        // Use a fixed salt for deterministic encryption (needed for database queries)
-        val salt = KeyGenerators.string().generateKey()
-        textEncryptor = Encryptors.text(encryptionPassword, salt)
+        if (encryptionSalt.isBlank()) {
+            throw IllegalStateException("Encryption salt must be configured")
+        }
+        textEncryptor = Encryptors.text(encryptionPassword, encryptionSalt)
     }
 
     fun encrypt(plaintext: String?): String? {

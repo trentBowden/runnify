@@ -3,6 +3,7 @@ package dev.trentbowden.runnify.service.Spotify
 import dev.trentbowden.runnify.entity.Member
 import dev.trentbowden.runnify.entity.OAuthProvider
 import dev.trentbowden.runnify.entity.OAuthState
+import dev.trentbowden.runnify.entity.Playlist
 import dev.trentbowden.runnify.repository.MemberRepository
 import dev.trentbowden.runnify.repository.OAuthStateRepository
 import jakarta.annotation.PostConstruct
@@ -245,6 +246,73 @@ class SpotifyService(
         val email: String?,
         val profileImageUrl: String?
     )
+
+
+    /**
+     * Get user's Spotify playlists using their stored credentials
+     */
+    fun getUserPlaylists(member: Member): List<Playlist> {
+        val userSpotifyApi = createUserSpotifyApi(member)
+
+        return try {
+            val currentUsersPlaylists = userSpotifyApi.listOfCurrentUsersPlaylists.build().execute()
+
+            currentUsersPlaylists.items.map { spotifyPlaylist ->
+                Playlist(
+                    id = spotifyPlaylist.id,
+                    name = spotifyPlaylist.name,
+                    tracks = listOf(),
+//                    url = spotifyPlaylist.externalUrls.get("spotify") ?: ""
+                )
+            }
+        } catch (e: IOException) {
+            throw RuntimeException("Failed to fetch user playlists (IO): ${e.message}", e)
+        } catch (e: SpotifyWebApiException) {
+            throw RuntimeException("Failed to fetch user playlists (API): ${e.message}", e)
+        }
+    }
+
+    /**
+     * Get a specific playlist by ID for the authenticated user
+     */
+    fun getUserPlaylistById(member: Member, playlistId: String): Playlist {
+        val userSpotifyApi = createUserSpotifyApi(member)
+
+        return try {
+            val spotifyPlaylist = userSpotifyApi.getPlaylist(playlistId).build().execute()
+            val playlistTracks = userSpotifyApi.getPlaylistsItems(playlistId).build().execute()
+
+            val tracks = playlistTracks.items.map { playlistTrack ->
+                // TODO fill this in for our DTO
+            }
+
+            Playlist(
+                id = spotifyPlaylist.id,
+                name = spotifyPlaylist.name,
+                tracks = listOf(),
+//                url = spotifyPlaylist.externalUrls.get("spotify") ?: ""
+            )
+        } catch (e: IOException) {
+            throw RuntimeException("Failed to fetch playlist (IO): ${e.message}", e)
+        } catch (e: SpotifyWebApiException) {
+            throw RuntimeException("Failed to fetch playlist (API): ${e.message}", e)
+        }
+    }
+
+    /**
+     * Create a SpotifyApi instance configured with user's access token
+     */
+    private fun createUserSpotifyApi(member: Member): SpotifyApi {
+        val accessToken = spotifyCredentialsService.getDecryptedAccessToken(member)
+            ?: throw IllegalStateException("No valid Spotify credentials found for user. Please re-authenticate.")
+
+        return SpotifyApi.builder()
+            .setClientId(clientId)
+            .setClientSecret(clientSecret)
+            .setAccessToken(accessToken)
+            .build()
+    }
+
 
 
 
