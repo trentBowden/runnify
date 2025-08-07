@@ -5,6 +5,7 @@ import {
 } from "@reduxjs/toolkit";
 import { SpotifyOAuthControllerApi } from "../../runnify-api-v1";
 import type { LoggedInMemberDto } from "../../runnify-api-v1";
+import { createPublicApiClient } from "../../utils/apiClient";
 
 export interface AuthState {
   user: LoggedInMemberDto | null;
@@ -24,7 +25,7 @@ const initialState: AuthState = {
   spotifyState: null,
 };
 
-const spotifyOAuthApi = new SpotifyOAuthControllerApi();
+const spotifyOAuthApi = new SpotifyOAuthControllerApi(createPublicApiClient());
 
 // Step 1: Get Spotify authorization URL
 export const initiateSpotifyLogin = createAsyncThunk(

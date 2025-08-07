@@ -6,15 +6,20 @@ import {
   type BaseEntity,
   type NormalisedStoreState,
 } from "../../app/store/createNormalisedSlice";
+import { createConfiguredApiClient, getAuthToken } from "../../utils/apiClient";
 
 type PlaylistEntity = Playlist & BaseEntity;
 export type PlaylistState = NormalisedStoreState<PlaylistEntity>;
-const playlistApi = new UserPlaylistsControllerApi();
+
+// Create API client with automatic JWT token inclusion
+const getPlaylistApi = () =>
+  new UserPlaylistsControllerApi(createConfiguredApiClient(getAuthToken));
 
 // Api calls:
 export const fetchPlaylistById = createAsyncThunk(
   "playlists/fetchById",
   async (id: string) => {
+    const playlistApi = getPlaylistApi();
     const playlist = await playlistApi.getPlaylistById({ id });
     if (!playlist) {
       throw new Error(`Playlist with id ${id} not found`);
@@ -26,6 +31,7 @@ export const fetchPlaylistById = createAsyncThunk(
 export const fetchAllPlaylists = createAsyncThunk(
   "playlists/fetchAll",
   async () => {
+    const playlistApi = getPlaylistApi();
     const playlists = await playlistApi.getPlaylists();
     return playlists as PlaylistEntity[];
   }

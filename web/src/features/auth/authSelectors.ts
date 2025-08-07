@@ -20,3 +20,4 @@ export const selectUserAvatarUrl = (state: RootState) =>
   state.auth.user?.avatarUrl || null;
 
 export const selectUserId = (state: RootState) => state.auth.user?.id || null;
+
