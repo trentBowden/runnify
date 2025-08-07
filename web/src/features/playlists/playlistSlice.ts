@@ -8,7 +8,7 @@ import {
 } from "../../app/store/createNormalisedSlice";
 
 type PlaylistEntity = Playlist & BaseEntity;
-export interface PlaylistState extends NormalisedStoreState<PlaylistEntity> {}
+export type PlaylistState = NormalisedStoreState<PlaylistEntity>;
 const playlistApi = new UserPlaylistsControllerApi();
 
 // Api calls:

@@ -4,7 +4,7 @@ package dev.trentbowden.runnify.controller
 import dev.trentbowden.runnify.entity.PageView
 import dev.trentbowden.runnify.service.Gpx.GpxParsed
 import dev.trentbowden.runnify.service.PageViewService
-import dev.trentbowden.runnify.service.Spotify.Playlist
+import dev.trentbowden.runnify.entity.Playlist
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping

@@ -1,7 +1,7 @@
-package dev.trentbowden.runnify.service.Spotify
+package dev.trentbowden.runnify.entity
 
+import dev.trentbowden.runnify.entity.PlaylistTrack
 import io.swagger.v3.oas.annotations.media.Schema
-import se.michaelthelin.spotify.model_objects.specification.Track
 
 @Schema(description = "A playlist of tracks.")
 data class Playlist(

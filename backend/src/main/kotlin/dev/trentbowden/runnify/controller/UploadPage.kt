@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.multipart.MultipartFile
-import dev.trentbowden.runnify.service.SpotifyClient
+import dev.trentbowden.runnify.service.Spotify.SpotifyService
 
 
 @Controller
-class UploadPageController(private val pageViewService: PageViewService, private val spotifyClient: SpotifyClient,) {
+class UploadPageController(private val pageViewService: PageViewService, private val spotifyService: SpotifyService,) {
     @GetMapping("/upload")
 
     /** Upload page Allows the user to upload a GPX file for processing */
@@ -25,10 +25,10 @@ class UploadPageController(private val pageViewService: PageViewService, private
     @PostMapping("/upload")
     fun uploadFile(@RequestParam("file") file: MultipartFile, model: Model): String {
 
-        val track =  spotifyClient.searchTracks("horses")
+        val track =  spotifyService.searchTracks("horses")
         println(track)
 
-        val privateTracks = spotifyClient.getPrivatePlaylistTracks();
+        val privateTracks = spotifyService.getPrivatePlaylistTracks();
         println(privateTracks.map { it.track.name })
 
         val gpx = GpxParser().parse(file)
