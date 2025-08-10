@@ -1,12 +1,15 @@
 package dev.trentbowden.runnify.entity
 
 import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.Id
+import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
 import org.hibernate.annotations.UuidGenerator
@@ -20,7 +23,11 @@ enum class OAuthProvider {
 data class LoggedInMemberDto(
     val id: UUID,
     val name: String?,
-    val avatarUrl: String? = null
+    val avatarUrl: String? = null,
+    val hasStravaLinked: Boolean = false,
+    val linkedServices: List<String> = emptyList()
+
+
 )
 
 @Entity
@@ -54,5 +61,18 @@ data class Member(
 
     @Schema(description = "The URL of the member's avatar.")
     @Column(name = "avatar_url", nullable = true, length = 1000)
-    val avatarUrl: String? = null
-)
+    val avatarUrl: String? = null,
+
+    // Relationships to credentials.
+    @OneToOne(mappedBy = "member", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    val spotifyCredentials: SpotifyCredentials? = null,
+
+    @OneToOne(mappedBy = "member", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    val stravaCredentials: StravaCredentials? = null
+
+) {
+    fun hasStravaLinked(): Boolean = stravaCredentials != null
+    fun hasSpotifyLinked(): Boolean = spotifyCredentials != null
+
+
+}
