@@ -19,8 +19,15 @@ const getPlaylistApi = () =>
 export const fetchPlaylistById = createAsyncThunk(
   "playlists/fetchById",
   async (id: string) => {
+    const token = getAuthToken();
+    if (!token) {
+      throw new Error("No authentication token available");
+    }
     const playlistApi = getPlaylistApi();
-    const playlist = await playlistApi.getPlaylistById({ id });
+    const playlist = await playlistApi.getPlaylistById({
+      id,
+      authorization: `Bearer ${token}`,
+    });
     if (!playlist) {
       throw new Error(`Playlist with id ${id} not found`);
     }
@@ -31,8 +38,14 @@ export const fetchPlaylistById = createAsyncThunk(
 export const fetchAllPlaylists = createAsyncThunk(
   "playlists/fetchAll",
   async () => {
+    const token = getAuthToken();
+    if (!token) {
+      throw new Error("No authentication token available");
+    }
     const playlistApi = getPlaylistApi();
-    const playlists = await playlistApi.getPlaylists();
+    const playlists = await playlistApi.getPlaylists({
+      authorization: `Bearer ${token}`,
+    });
     return playlists as PlaylistEntity[];
   }
 );

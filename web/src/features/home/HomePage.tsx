@@ -10,11 +10,10 @@ import { selectAllPlaylists, selectPlaylistsError, selectPlaylistsLoading } from
 import { fetchAllPlaylists } from '../playlists/playlistSlice';
 import { 
   selectIsAuthenticated, 
-  selectAuthUser, 
-  selectAuthLoading, 
-  selectAuthError 
+  selectAuthUser 
 } from '../auth/authSelectors';
-import { initiateSpotifyLogin, logout, restoreAuthFromStorage } from '../auth/authSlice';
+import { logout, restoreAuthFromStorage } from '../auth/authSlice';
+import Login from '../auth/Login';
 import styles from './Home.module.css';
 
 const HomePage = () => {
@@ -23,8 +22,6 @@ const HomePage = () => {
   // Auth state
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const user = useAppSelector(selectAuthUser);
-  const authLoading = useAppSelector(selectAuthLoading);
-  const authError = useAppSelector(selectAuthError);
 
   // Playlist state
   const playlists = useAppSelector(selectAllPlaylists);
@@ -55,63 +52,17 @@ const HomePage = () => {
     }
   }, [dispatch, isAuthenticated]);
 
-  const handleLogin = async () => {
-    try {
-      const result = await dispatch(initiateSpotifyLogin()).unwrap();
-      // Redirect to Spotify OAuth URL
-      window.location.href = result.authUrl;
-    } catch (error) {
-      console.error('Failed to initiate login:', error);
-    }
-  };
+
 
   const handleLogout = () => {
     dispatch(logout());
   };
 
-  // Show loading state
-  if (authLoading) {
-    return <div>Authenticating...</div>;
-  }
-
-  // Show auth error
-  if (authError) {
-    return (
-      <div>
-        <div>Authentication Error: {authError}</div>
-        <button onClick={handleLogin}>Try Login Again</button>
-      </div>
-    );
-  }
-
   // If not authenticated, show login screen
   if (!isAuthenticated) {
     return (
       <div className={styles.homeContainer}>
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          height: '100vh',
-          flexDirection: 'column'
-        }}>
-          <h1>Welcome to Runnify</h1>
-          <p>Connect your Spotify account to get started</p>
-          <button 
-            onClick={handleLogin}
-            style={{
-              padding: '12px 24px',
-              fontSize: '16px',
-              backgroundColor: '#1db954',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer'
-            }}
-          >
-            Login with Spotify
-          </button>
-        </div>
+        <Login />
       </div>
     );
   }

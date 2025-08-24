@@ -1,0 +1,103 @@
+.loginContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  flex-direction: column;
+}
+
+.title {
+  font-size: 3rem;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  color: #666;
+}
+
+.loginButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 12px 24px;
+  font-size: 16px;
+  background-color: #179744;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.loginButton:hover {
+  background-color: #1ed760;
+}
+
+.loginButton:active {
+  background-color: #1aa34a;
+}
+
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  text-align: center;
+  padding: 2rem;
+}
+
+.errorMessage {
+  color: #dc3545;
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  max-width: 400px;
+}
+
+.retryButton {
+  padding: 10px 20px;
+  font-size: 14px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.retryButton:hover {
+  background-color: #c82333;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.logo {
+  width: 60px;
+  height: 60px;
+
+  svg {
+    filter: invert(100%);
+  }
+}
+.spotifyLogo {
+  width: 30px;
+  height: 30px;
+}
+
+.productTitleContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
