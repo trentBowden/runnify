@@ -15,6 +15,8 @@ import {
 import { logout, restoreAuthFromStorage } from '../auth/authSlice';
 import Login from '../auth/Login';
 import styles from './Home.module.css';
+import PlaylistPicker from './components/PlaylistPicker';
+import GpxFilePicker from './components/GpxFilePicker';
 
 const HomePage = () => {
   const dispatch = useAppDispatch();
@@ -106,13 +108,13 @@ const HomePage = () => {
       </div>
 
       {/* Column 1: The Playlist Picker and the GpxFileList */}
-      <div className={styles.column}>
-        Playlist picker ({playlists.length} playlists)
-        <ul>
-          {playlists.map((playlist) => (
-            <li key={playlist.id}>{playlist.name}</li>
-          ))}
-        </ul>
+      <div className={`${styles.column}`}>
+        <div className={styles.playlistPicker}>
+          <PlaylistPicker playlists={playlists}/>
+        </div>
+        <div className={styles.gpxFileList}>
+          <GpxFilePicker gpxFiles={[]}/>
+        </div>
       </div>
 
       {/* Column 2: The Playlist Detail View */}

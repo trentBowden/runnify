@@ -1,17 +1,25 @@
 .homeContainer {
   display: flex;
-  height: 100vh;
+  height: 80vh;
   gap: 1rem;
   padding: 1rem;
 }
 
 .column {
-  flex: 1;
+  flex: .33;
   padding: 1rem;
-  border: 1px solid #e0e0e0;
   border-radius: 8px;
-  background-color: #f9f9f9;
-  color: black;
+  background-color: #181818;
+  color: #fff;
+  height: 100%;
+}
+
+.playlistPicker {
+  height: 70%;
+}
+
+.gpxFilePicker {
+  height: 30%;
 }
 
 .column:nth-child(1),
